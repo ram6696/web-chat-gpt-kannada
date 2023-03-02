@@ -1,8 +1,24 @@
 'use strict';
 
 require('dotenv').config()
-const APIAI_TOKEN = process.env.APIAI_TOKEN;
-const APIAI_SESSION_ID = process.env.APIAI_SESSION_ID;
+const openAIImport = require('openai');
+const configuration = new openAIImport.Configuration({
+  apiKey: process.env.CHAT_GPT_API_KEY,
+});
+const openai = new openAIImport.OpenAIApi(configuration);
+
+
+
+const textToSpeech = require('@google-cloud/text-to-speech');
+const {Translate} = require('@google-cloud/translate').v2;
+
+
+// Import other required libraries
+const fs = require('fs');
+const util = require('util');
+
+const client = new textToSpeech.TextToSpeechClient();
+const translate = new Translate();
 
 const express = require('express');
 const app = express();
@@ -19,7 +35,7 @@ io.on('connection', function(socket){
   console.log('a user connected');
 });
 
-const apiai = require('apiai')(APIAI_TOKEN);
+// const apiai = require('apiai')(APIAI_TOKEN);
 
 // Web UI
 app.get('/', (req, res) => {
@@ -27,26 +43,62 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', function(socket) {
-  socket.on('chat message', (text) => {
+  socket.on('chat message', async (text) => {
     console.log('Message: ' + text);
+
+    // convert text to english
 
     // Get a reply from API.ai
 
-    let apiaiReq = apiai.textRequest(text, {
-      sessionId: APIAI_SESSION_ID
-    });
+    // let apiaiReq = apiai.textRequest(text, {
+    //   sessionId: APIAI_SESSION_ID
+    // });
 
-    apiaiReq.on('response', (response) => {
-      let aiText = response.result.fulfillment.speech;
-      console.log('Bot reply: ' + aiText);
-      socket.emit('bot reply', aiText);
-    });
+    const [englishTranslation] = await translate.translate(text, 'en-US');
+    console.log('englishTranslation', englishTranslation);
 
-    apiaiReq.on('error', (error) => {
+    try {
+      const completion = await openai.createCompletion({
+        model: process.env.OPEN_AI_MODAL,
+        prompt: englishTranslation,
+        temperature: +process.env.OPEN_AI_TEMPERATURE,
+        max_tokens: +process.env.CHAT_GPT_MAX_TOKENS,
+      });
+      const aiText = completion.data.choices[0].text?.trim();
+
+      console.log(aiText, 'aiText');
+
+      const [kannadaTranslation] = await translate.translate(aiText, 'kn');
+      const request = {
+        input: {text: kannadaTranslation},
+        // Select the language and SSML voice gender (optional)
+        voice: {languageCode: 'kn-IN', ssmlGender: 'NEUTRAL'},
+        // select the type of audio encoding
+        audioConfig: {audioEncoding: 'MP3'},
+      };
+  
+      // Performs the text-to-speech request
+      const [response] = await client.synthesizeSpeech(request);
+      socket.emit('audio reply', response.audioContent)
+      socket.emit('bot reply', kannadaTranslation);
+    } catch (error) {
       console.log(error);
-    });
+    }
+    
 
-    apiaiReq.end();
+    
+
+    // apiaiReq.on('response', (response) => {
+    //   let aiText = response.result.fulfillment.speech;
+    //   console.log('Bot reply: ' + aiText);
+    //   socket.emit('bot reply', aiText);
+    // });
+
+    // apiaiReq.on('error', (error) => {
+    //   console.log(error);
+    // });
+
+    // apiaiReq.end();
 
   });
 });
