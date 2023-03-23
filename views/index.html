@@ -8,23 +8,63 @@
     <meta name="author" content="Tomomi Imura  @girlie_mac">
 
     <title>Simple AI Demo with Web Speech API</title>
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/style.css">
   </head>
 
   <body>
-    <section>
-      <h1>Simple AI Bot</h1>
-      <h2>with Web Speech API</h2>
 
-      <button><i class="fa fa-microphone"></i></button>
+  <div style="width: 100%;height: 100%;position: fixed;overflow: auto;">
+    <h1 >Kannada AI Bot</h1>
+    <div style="display: flex; border-radius: 10px; border: #686868 1px solid; margin: 10px; height: 90%">
+      <section style="float: left;width: 45%; margin-top: 130px;">
+        <h2>Ask your queries here</h2>
 
-      <div>
-          <p>You said: <em class="output-you">...</em></p>
+        <button id="microphoneId" class="microphone"><i class="fa fa-microphone"></i></button>
+        <div style="text-align: center;">
+          <p>You said: <em class="output-you" style="font-weight: 700;">Speak...</em></p>
+          <div id="audioPlayer" class="hideBlock">
+            <audio id="audio">
+              <source src="output.mp3" type="audio/mp3">
+            </audio>
+
+            <div class="player-controls">
+
+
+              <button id="playAudio"></button>
+
+              <div id="seekObjContainer">
+                <div id="seekObj">
+                  <div id="percentage"></div>
+                </div>
+              </div>
+
+              <p><small id="currentTime">00:00</small></p>
+
+            </div>
+          </div>
           <p>Bot replied: <em class="output-bot">...</em></p>
-      </div>
-    </section>
+        </div>
+      </section>
+      <section id="historyContainer" style="float: right;margin-right: 15px; width: 50%;">
+        <div style="flex: 1; height: 100%; width: 90%; margin: auto; background-color: #f7f7f7; ">
+
+          <div style="height: 98%">
+            <h2>History</h2>
+            <div style="    position: relative; border: grey 1px solid; border-radius: 5px; padding: 10px; height: 95%; overflow: auto;margin-top: 15px;">
+              <div id="chats" style="width: 95%;
+    position: absolute;
+    bottom: 0;     max-height: 99%;
+    top: auto;
+    margin: 0px 8px;"> </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/script.js"></script>

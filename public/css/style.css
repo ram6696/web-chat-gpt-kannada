@@ -43,7 +43,7 @@ section {
   margin: 1.5em auto;
   width: 400px;
 }
-button {
+.microphone {
   display: block;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -61,19 +61,19 @@ button {
   will-change: transform, filter;
   transition: all 0.3s ease-out;
 }
-button .fa {
+.microphone .fa {
   font-size: 130px;
   line-height: 200px;
   margin: 0;
   text-shadow: 1px 2px 2px #2a8b90;
 }
-button:hover {
+.microphone:hover {
   transform: scale(.92);
 }
-button:active {
+.microphone:active {
   filter: brightness(.8);
 }
-button:focus {
+.microphone:focus {
   outline: 0;
 }
 
@@ -88,4 +88,113 @@ button:focus {
 }
 .fa-github::before {
     content: "\f09b";
+}
+
+#chats > div {
+  min-width: 50px;
+  max-width: 60%;
+  margin-bottom: 5px;
+  padding: 2px 10px;
+}
+
+.botReply {
+  width: 90%;
+  display: flow-root;
+  padding: inherit;
+  background-color: #bbbbbb;
+  border-radius: 5px 5px 5px 0px;
+}
+.input {
+  width: 90%;
+  display: flow-root;
+  padding: inherit;
+  background-color: #39c2c9;
+  border-radius: 5px 5px 0px 5px;
+  text-align: right;
+}
+
+.chatNode {
+  display: flex;
+}
+.chatRight {
+  margin-left: 50% !important;
+
+}
+.chatNode > em {
+  border: #989898 1px solid;
+  padding: 11px;
+  margin: 0px 5px;
+  border-radius: 62px;
+  align-self: flex-end;
+  font-size: x-large;
+}
+
+.chartleft {
+
+}
+.hideBlock {
+  display: none;
+}
+
+.audio-player {
+  border-radius: 30px;
+  width: 360px;
+  padding: 5px 20px;
+  margin: auto;
+  background-color: white;
+  border: 1px solid black;
+}
+.audio-player .player-controls {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.audio-player #radioIcon {
+  width: 30px;
+  height: 30px;
+  background: url('https://img.icons8.com/ios/50/000000/microphone.png') no-repeat center;
+  background-size: contain;
+}
+.audio-player #playAudio {
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  border: none;
+  width: 22px;
+  height: 30px;
+  background: url('https://img.icons8.com/play') no-repeat center;
+  background-size: contain;
+}
+.audio-player #playAudio.pause {
+  background: url('https://img.icons8.com/pause') no-repeat center;
+  background-size: contain;
+}
+.audio-player p {
+  margin: 0 0 0 5px;
+  line-height: 1;
+  display: inline-flex;
+}
+.audio-player p small {
+  font-size: 10px;
+}
+.audio-player #seekObjContainer {
+  position: relative;
+  width: 230px;
+  margin: 0 5px;
+  height: 5px;
+}
+.audio-player #seekObjContainer #seekObj {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #e3e3e3;
+  border: 1px solid black;
+}
+.audio-player #seekObjContainer #seekObj #percentage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background-color: coral;
 }
