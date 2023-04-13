@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Tomomi Imura",
+  "author": "Jayanthi",
   "license": "MIT",
   "dependencies": {
     "@google-cloud/text-to-speech": "^4.2.1",
