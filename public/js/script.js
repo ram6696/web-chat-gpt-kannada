@@ -5,6 +5,8 @@ const outputYou = document.querySelector('.output-you');
 const outputBot = document.querySelector('.output-bot');
 const button = document.getElementById('microphoneId')
 const chatsElement = document.getElementById("chats")
+const questionInputBox = document.getElementById("questionInputBox")
+const askbutton = document.getElementById("askButton")
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 var audioPlayer = document.getElementById("audioPlayer")
@@ -13,31 +15,25 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = new AudioContext();
 let track;
 track = audioCtx.createBufferSource();
-const media = $('audio');
-function copyaa(src)  {
-  var dst = new ArrayBuffer(src.byteLength);
-  new Uint8Array(dst).set(new Uint8Array(src));
-  return dst;
-}
-const audioTag = document.getElementById('audio');
+let audioTag, media;
 // const context = new AudioContext();
 // const source = context.createBufferSource();
 function microPhoneClicked () {
   outputYou.textContent = "Speak..."
-  if (!audioTag.paused) {
+  if (media && audioTag && !audioTag.paused) {
     togglePlay()
   }
-  audioPlayer.className = "hideBlock";
+  deleteAudioTag ()
   button.style = "background: #ff6464;";
 }
 function listenStarted () {
-  audioPlayer.className = "hideBlock";
+  deleteAudioTag ()
   outputYou.textContent = "Listening..."
   outputBot.textContent = "...";
   button.style = "background: #ff6464;";
 }
 function listenEnded () {
-  audioPlayer.className = "hideBlock";
+  deleteAudioTag ()
   button.style = "background: linear-gradient(180deg, #39C2C9 0%, #3FC8C9 80%, #3FC8C9 100%)";
 }
 
@@ -115,7 +111,7 @@ recognition.addEventListener('result', (e) => {
   outputYou.textContent = text;
   console.log('Confidence: ' + e.results[0][0].confidence);
   listenEnded();
-  socket.emit('chat message', text);
+  socket.emit('chat message', {text, from: 'audio'});
 });
 
 recognition.addEventListener('speechend', () => {
@@ -157,13 +153,9 @@ socket.on('conversations', function (json) {
 })
 
 socket.on('audio reply', function(replyText) {
-  console.log(replyText)
   botReplay = replyText;
-  audio.load();
   audioPlayer.className = "audio-player";
-  setTimeout(() =>  {
-    togglePlay()
-  }, 2000);
+  createAudioTag ()
 })
 
 socket.on('bot reply', function(replyText) {
@@ -171,6 +163,7 @@ socket.on('bot reply', function(replyText) {
 
   if(replyText == '') replyText = '(No answer...)';
   outputBot.textContent = replyText;
+  questionInputBox.textContent = '';
 });
 
   function $(id) { return document.getElementById(id); };
@@ -227,6 +220,44 @@ socket.on('bot reply', function(replyText) {
     calculatePercentPlayed();
   }
 
-  $(ui.play).addEventListener('click', togglePlay)
-  $(ui.audio).addEventListener('timeupdate', initProgressBar);
+  askbutton.addEventListener('click',function (event) {
+    if (questionInputBox.value){
+      socket.emit('chat message', {text: questionInputBox.value, from: 'input'});
+      outputYou.textContent = questionInputBox.value;
+      outputBot.textContent = "..."
+      if (media && audioTag && !audioTag.paused) {
+        togglePlay()
+      }
+      deleteAudioTag ()
+    } else {
+      alert("Question cannot be empty");
+    }
+  })
+
+  function deleteAudioTag () {
+    audioPlayer.className = "hideBlock";
+    let audioElement = document.getElementById('audio');
+    if (audioElement){
+      audioElement.remove()
+    }
+  }
+
+  function addAudioControlEventListener () {
+    media = $('audio');
+    audioTag = document.getElementById('audioTag');
+    $(ui.play).addEventListener('click', togglePlay)
+    $(ui.audio).addEventListener('timeupdate', initProgressBar);
+  }
+function createAudioTag () {
+    let audioElement = document.createElement('audio');
+    let audioSourceElement = document.createElement('source');
+    audioElement.id = 'audio';
+    audioSourceElement.src = "output.mp3";
+    audioSourceElement.type = "audio/mp3";
+    audioElement.className = "audio-player";
+    audioElement.appendChild(audioSourceElement);
+    audioPlayer.insertBefore(audioElement, audioPlayer.firstChild);
+    addAudioControlEventListener();
+    togglePlay();
+  }
 // }

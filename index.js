@@ -42,7 +42,6 @@ io.on('connection', function(socket){
     }
     let conversations = [];
     if(data.toString()) {
-      console.log('coming inside', data.toString());
       conversations = JSON.parse(data.toString());
     }
     socket.emit('startConversations', conversations);
@@ -57,11 +56,15 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', function(socket) {
-  socket.on('chat message', async (text) => {
-    console.log('Message: ' + text);
+  socket.on('chat message', async (chat) => {
+    let text = chat.text;
+    const from = chat.from;
+    console.log('Message: ' + chat.text);
 
-    const [englishTranslation] = await translate.translate(text, 'en-US');
-    console.log('englishTranslation', englishTranslation);
+    let englishTranslation = text;
+    if(from === 'audio') {
+      [englishTranslation] = await translate.translate(text, 'en-US');
+    }
 
     try {
       const completion = await openai.createCompletion({
@@ -72,8 +75,6 @@ io.on('connection', function(socket) {
       });
       const aiText = completion.data.choices[0].text?.trim();
 
-      console.log(aiText, 'aiText');
-
       const [kannadaTranslation] = await translate.translate(aiText, 'kn');
       const request = {
         input: {text: kannadaTranslation},
@@ -82,6 +83,12 @@ io.on('connection', function(socket) {
         // select the type of audio encoding
         audioConfig: {audioEncoding: 'MP3'},
       };
+
+      if(from === 'input') {
+        [text] = await translate.translate(text, 'kn')
+      }
+
+      console.log(text);
   
       // Performs the text-to-speech request
       const [response] = await client.synthesizeSpeech(request);
@@ -94,7 +101,6 @@ io.on('connection', function(socket) {
         }
         let conversations = [];
         if(data.toString()) {
-          console.log('coming inside', data.toString());
           conversations = JSON.parse(data.toString());
         }
         if(conversations.length) {
