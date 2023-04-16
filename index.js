@@ -60,14 +60,6 @@ io.on('connection', function(socket) {
   socket.on('chat message', async (text) => {
     console.log('Message: ' + text);
 
-    // convert text to english
-
-    // Get a reply from API.ai
-
-    // let apiaiReq = apiai.textRequest(text, {
-    //   sessionId: APIAI_SESSION_ID
-    // });
-
     const [englishTranslation] = await translate.translate(text, 'en-US');
     console.log('englishTranslation', englishTranslation);
 
